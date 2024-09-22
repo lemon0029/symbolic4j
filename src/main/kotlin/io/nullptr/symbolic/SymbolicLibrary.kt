@@ -7,6 +7,7 @@ import com.sun.jna.Native
 import io.nullptr.symbolic.common.SymbolicString
 import io.nullptr.symbolic.`object`.SymbolicArchive
 import io.nullptr.symbolic.`object`.SymbolicObject
+import io.nullptr.symbolic.`object`.SymbolicObjectFeatures
 
 internal interface SymbolicLibrary : Library {
 
@@ -60,4 +61,14 @@ internal interface SymbolicLibrary : Library {
      * Returns the file format of the given symbolic object.
      */
     fun symbolic_object_get_file_format(obj: SymbolicObject): SymbolicString.ByValue?
+
+    /**
+     * Returns the features of the given symbolic object.
+     */
+    fun symbolic_object_get_features(obj: SymbolicObject): SymbolicObjectFeatures.ByValue?
+
+    /**
+     * Frees the given symbolic object.
+     */
+    fun symbolic_object_free(obj: SymbolicObject)
 }
