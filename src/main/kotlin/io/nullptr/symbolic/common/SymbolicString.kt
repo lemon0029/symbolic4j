@@ -15,15 +15,15 @@ open class SymbolicString : Structure() {
     @JvmField
     var owned: Boolean = false
 
-    fun decodeToString(): String {
+    fun decodeToString(): String? {
         try {
 
             if (data == null) {
-                throw IllegalStateException("Data is null")
+                return null
             }
 
             if (len <= 0) {
-                throw IllegalStateException("Length is less than or equal to 0")
+                return null
             }
 
             val bytes = data?.getByteArray(0, len.toInt()) ?: throw IllegalStateException("Failed to get byte array")

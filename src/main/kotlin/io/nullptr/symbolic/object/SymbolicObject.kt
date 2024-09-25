@@ -32,23 +32,23 @@ class SymbolicObject : PointerType() {
         val symbolicLibrary = SymbolicLibrary.INSTANCE
 
         symbolicLibrary.symbolic_object_get_arch(this)?.let {
-            arch = it.decodeToString()
+            arch = it.decodeToString() ?: ""
         }
 
         symbolicLibrary.symbolic_object_get_code_id(this)?.let {
-            codeId = it.decodeToString()
+            codeId = it.decodeToString() ?: ""
         }
 
         symbolicLibrary.symbolic_object_get_debug_id(this)?.let {
-            debugId = it.decodeToString()
+            debugId = it.decodeToString() ?: ""
         }
 
         symbolicLibrary.symbolic_object_get_kind(this)?.let {
-            kind = it.decodeToString()
+            kind = it.decodeToString() ?: ""
         }
 
         symbolicLibrary.symbolic_object_get_file_format(this)?.let {
-            fileFormat = it.decodeToString()
+            fileFormat = it.decodeToString() ?: ""
         }
 
         symbolicLibrary.symbolic_object_get_features(this)?.let {

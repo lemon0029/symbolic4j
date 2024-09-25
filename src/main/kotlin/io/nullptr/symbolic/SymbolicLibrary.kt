@@ -18,6 +18,31 @@ internal interface SymbolicLibrary : Library {
     }
 
     /**
+     * Initializes the symbolic library. (rust set panic hook)
+     */
+    fun symbolic_init()
+
+    /**
+     * Returns the last error code.
+     */
+    fun symbolic_err_get_last_code(): Int
+
+    /**
+     * Returns the last error message.
+     */
+    fun symbolic_err_get_last_message(): SymbolicString.ByValue?
+
+    /**
+     * Returns the last error backtrace.
+     */
+    fun symbolic_err_get_backtrace(): SymbolicString.ByValue?
+
+    /**
+     * Clears the last error.
+     */
+    fun symbolic_err_clear()
+
+    /**
      * Opens a symbolic archive at the given path.
      */
     fun symbolic_archive_open(path: String): SymbolicArchive?
