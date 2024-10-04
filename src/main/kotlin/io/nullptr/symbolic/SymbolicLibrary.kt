@@ -5,6 +5,7 @@ package io.nullptr.symbolic
 import com.sun.jna.Library
 import com.sun.jna.Native
 import io.nullptr.symbolic.common.SymbolicString
+import io.nullptr.symbolic.lookup.SymbolCache
 import io.nullptr.symbolic.`object`.SymbolicArchive
 import io.nullptr.symbolic.`object`.SymbolicObject
 import io.nullptr.symbolic.`object`.SymbolicObjectFeatures
@@ -96,4 +97,14 @@ internal interface SymbolicLibrary : Library {
      * Frees the given symbolic object.
      */
     fun symbolic_object_free(obj: SymbolicObject)
+
+    /**
+     * Creates a symcache from the given object.
+     */
+    fun symbolic_symcache_from_object(obj: SymbolicObject): SymbolCache?
+
+    /**
+     * Frees the given symcache.
+     */
+    fun symbolic_symcache_free(cache: SymbolCache)
 }

@@ -2,6 +2,7 @@ package io.nullptr.symbolic.`object`
 
 import com.sun.jna.PointerType
 import io.nullptr.symbolic.SymbolicLibrary
+import io.nullptr.symbolic.lookup.SymbolCache
 
 class SymbolicObject : PointerType() {
 
@@ -59,6 +60,10 @@ class SymbolicObject : PointerType() {
         }
 
         initialized = true
+    }
+
+    fun createSymCache(): SymbolCache? {
+        return SymbolicLibrary.INSTANCE.symbolic_symcache_from_object(this)
     }
 
     fun free() {
