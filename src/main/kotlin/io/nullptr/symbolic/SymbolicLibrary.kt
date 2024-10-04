@@ -4,6 +4,7 @@ package io.nullptr.symbolic
 
 import com.sun.jna.Library
 import com.sun.jna.Native
+import com.sun.jna.Pointer
 import io.nullptr.symbolic.common.SymbolicString
 import io.nullptr.symbolic.lookup.SymbolCache
 import io.nullptr.symbolic.`object`.SymbolicArchive
@@ -104,7 +105,37 @@ internal interface SymbolicLibrary : Library {
     fun symbolic_symcache_from_object(obj: SymbolicObject): SymbolCache?
 
     /**
+     * Opens a symcache at the given path.
+     */
+    fun symbolic_symcache_open(path: String): SymbolCache?
+
+    /**
      * Frees the given symcache.
      */
     fun symbolic_symcache_free(cache: SymbolCache)
+
+    /**
+     * Returns the architecture of the given symcache.
+     */
+    fun symbolic_symcache_get_arch(cache: SymbolCache): SymbolicString.ByValue?
+
+    /**
+     * Returns the size of the given symcache.
+     */
+    fun symbolic_symcache_get_size(cache: SymbolCache): Long
+
+    /**
+     * Returns the debug identifier of the given symcache.
+     */
+    fun symbolic_symcache_get_debug_id(cache: SymbolCache): SymbolicString.ByValue?
+
+    /**
+     * Returns the version of the given symcache.
+     */
+    fun symbolic_symcache_get_version(cache: SymbolCache): Int
+
+    /**
+     * Returns the bytes of the given symcache.
+     */
+    fun symbolic_symcache_get_bytes(cache: SymbolCache): Pointer?
 }

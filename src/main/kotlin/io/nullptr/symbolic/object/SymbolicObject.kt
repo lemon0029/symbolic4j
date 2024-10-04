@@ -63,7 +63,11 @@ class SymbolicObject : PointerType() {
     }
 
     fun createSymCache(): SymbolCache? {
-        return SymbolicLibrary.INSTANCE.symbolic_symcache_from_object(this)
+        val symbolCache = SymbolicLibrary.INSTANCE.symbolic_symcache_from_object(this)
+
+        symbolCache?.init()
+
+        return symbolCache
     }
 
     fun free() {
