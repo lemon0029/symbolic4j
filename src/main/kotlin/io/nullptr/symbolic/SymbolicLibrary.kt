@@ -6,11 +6,13 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import io.nullptr.symbolic.common.SymbolicString
+import io.nullptr.symbolic.common.SymbolicUuid
 import io.nullptr.symbolic.`object`.SymbolicSymCache
 import io.nullptr.symbolic.`object`.SymbolicLookupResult
 import io.nullptr.symbolic.`object`.SymbolicArchive
 import io.nullptr.symbolic.`object`.SymbolicObject
 import io.nullptr.symbolic.`object`.SymbolicObjectFeatures
+import io.nullptr.symbolic.proguard.SymbolicProguardMapper
 
 internal interface SymbolicLibrary : Library {
 
@@ -160,4 +162,19 @@ internal interface SymbolicLibrary : Library {
      * Frees the given string.
      */
     fun symbolic_str_free(string: Pointer)
+
+    /**
+     * Opens a proguard mapper at the given path.
+     */
+    fun symbolic_proguardmapper_open(path: String, initializeParamMapping: Boolean): SymbolicProguardMapper?
+
+    /**
+     * Returns the uuid of the given proguard mapper.
+     */
+    fun symbolic_proguardmapper_get_uuid(proguardMapper: SymbolicProguardMapper): SymbolicUuid.ByValue
+
+    /**
+     * Returns whether the given proguard mapper has line info.
+     */
+    fun symbolic_proguardmapper_has_line_info(proguardMapper: SymbolicProguardMapper): Boolean
 }
