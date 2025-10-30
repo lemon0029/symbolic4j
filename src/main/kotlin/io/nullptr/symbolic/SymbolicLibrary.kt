@@ -6,7 +6,8 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import io.nullptr.symbolic.common.SymbolicString
-import io.nullptr.symbolic.lookup.SymbolCache
+import io.nullptr.symbolic.`object`.SymbolicSymCache
+import io.nullptr.symbolic.`object`.SymbolicLookupResult
 import io.nullptr.symbolic.`object`.SymbolicArchive
 import io.nullptr.symbolic.`object`.SymbolicObject
 import io.nullptr.symbolic.`object`.SymbolicObjectFeatures
@@ -18,6 +19,7 @@ internal interface SymbolicLibrary : Library {
         @JvmStatic
         val INSTANCE: SymbolicLibrary = Native.load(SymbolicLibrary::class.java)
     }
+
 
     /**
      * Initializes the symbolic library. (rust set panic hook)
@@ -90,6 +92,11 @@ internal interface SymbolicLibrary : Library {
     fun symbolic_object_get_file_format(obj: SymbolicObject): SymbolicString.ByValue?
 
     /**
+     * Returns the load address of the object file.
+     */
+    fun symbolic_object_get_load_address(ob: SymbolicObject): Long
+
+    /**
      * Returns the features of the given symbolic object.
      */
     fun symbolic_object_get_features(obj: SymbolicObject): SymbolicObjectFeatures.ByValue?
@@ -102,40 +109,55 @@ internal interface SymbolicLibrary : Library {
     /**
      * Creates a symcache from the given object.
      */
-    fun symbolic_symcache_from_object(obj: SymbolicObject): SymbolCache?
+    fun symbolic_symcache_from_object(obj: SymbolicObject): SymbolicSymCache?
 
     /**
      * Opens a symcache at the given path.
      */
-    fun symbolic_symcache_open(path: String): SymbolCache?
+    fun symbolic_symcache_open(path: String): SymbolicSymCache?
 
     /**
      * Frees the given symcache.
      */
-    fun symbolic_symcache_free(cache: SymbolCache)
+    fun symbolic_symcache_free(cache: SymbolicSymCache)
 
     /**
      * Returns the architecture of the given symcache.
      */
-    fun symbolic_symcache_get_arch(cache: SymbolCache): SymbolicString.ByValue?
+    fun symbolic_symcache_get_arch(cache: SymbolicSymCache): SymbolicString.ByValue?
 
     /**
      * Returns the size of the given symcache.
      */
-    fun symbolic_symcache_get_size(cache: SymbolCache): Long
+    fun symbolic_symcache_get_size(cache: SymbolicSymCache): Long
 
     /**
      * Returns the debug identifier of the given symcache.
      */
-    fun symbolic_symcache_get_debug_id(cache: SymbolCache): SymbolicString.ByValue?
+    fun symbolic_symcache_get_debug_id(cache: SymbolicSymCache): SymbolicString.ByValue?
 
     /**
      * Returns the version of the given symcache.
      */
-    fun symbolic_symcache_get_version(cache: SymbolCache): Int
+    fun symbolic_symcache_get_version(cache: SymbolicSymCache): Int
 
     /**
      * Returns the bytes of the given symcache.
      */
-    fun symbolic_symcache_get_bytes(cache: SymbolCache): Pointer?
+    fun symbolic_symcache_get_bytes(cache: SymbolicSymCache): Pointer?
+
+    /**
+     * Looks up the given offset in the given symcache.
+     */
+    fun symbolic_symcache_lookup(cache: SymbolicSymCache, offset: Int): SymbolicLookupResult.ByValue?
+
+    /**
+     * Frees the given lookup result.
+     */
+    fun symbolic_lookup_result_free(pointer: Pointer)
+
+    /**
+     * Frees the given string.
+     */
+    fun symbolic_str_free(string: Pointer)
 }

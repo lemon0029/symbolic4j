@@ -1,4 +1,4 @@
-package io.nullptr.symbolic.lookup
+package io.nullptr.symbolic.`object`
 
 import com.github.luben.zstd.Zstd
 import com.sun.jna.PointerType
@@ -8,7 +8,7 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.writeBytes
 
-class SymbolCache : PointerType() {
+class SymbolicSymCache : PointerType() {
 
     var size: Long = -1L
     var arch: String = ""
@@ -22,7 +22,7 @@ class SymbolCache : PointerType() {
 
     companion object {
 
-        fun open(path: String): SymbolCache? {
+        fun open(path: String): SymbolicSymCache? {
 
             val filePath = Path.of(path)
 
@@ -38,6 +38,20 @@ class SymbolCache : PointerType() {
 
             return symbolicCache
         }
+    }
+
+    fun lookup(instrAddr: Long, vmAddr: Long): List<SymbolicSourceLocation> {
+        return lookup((instrAddr - vmAddr).toInt())
+    }
+
+    fun lookup(offset: Int): List<SymbolicSourceLocation> {
+        val rawLookupResult = SymbolicLibrary.INSTANCE.symbolic_symcache_lookup(this, offset)
+
+        val sourceLocations = rawLookupResult!!.getItems()
+
+        SymbolicLibrary.INSTANCE.symbolic_lookup_result_free(rawLookupResult.pointer)
+
+        return sourceLocations
     }
 
     fun getBytes(): ByteArray {

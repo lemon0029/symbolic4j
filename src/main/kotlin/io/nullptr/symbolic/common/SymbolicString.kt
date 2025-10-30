@@ -2,6 +2,7 @@ package io.nullptr.symbolic.common
 
 import com.sun.jna.Pointer
 import com.sun.jna.Structure
+import io.nullptr.symbolic.SymbolicLibrary
 
 @Structure.FieldOrder("data", "len", "owned")
 open class SymbolicString : Structure() {
@@ -30,7 +31,7 @@ open class SymbolicString : Structure() {
             return String(bytes, Charsets.UTF_8)
         } finally {
             if (owned) {
-                println("TODO: Free owned memory for SymbolicString")
+                 SymbolicLibrary.INSTANCE.symbolic_str_free(this.pointer)
             }
         }
     }

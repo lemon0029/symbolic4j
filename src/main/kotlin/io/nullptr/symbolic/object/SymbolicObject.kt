@@ -2,7 +2,6 @@ package io.nullptr.symbolic.`object`
 
 import com.sun.jna.PointerType
 import io.nullptr.symbolic.SymbolicLibrary
-import io.nullptr.symbolic.lookup.SymbolCache
 
 class SymbolicObject : PointerType() {
 
@@ -20,6 +19,8 @@ class SymbolicObject : PointerType() {
     var hasDebug: Boolean = false
     var hasUnwind: Boolean = false
     var hasSources: Boolean = false
+
+    var loadAddress: Long? = null
 
     private var initialized = false
     private var released = false
@@ -52,6 +53,8 @@ class SymbolicObject : PointerType() {
             fileFormat = it.decodeToString() ?: ""
         }
 
+        loadAddress = symbolicLibrary.symbolic_object_get_load_address(this)
+
         symbolicLibrary.symbolic_object_get_features(this)?.let {
             hasSymtab = it.symtab != 0.toByte()
             hasDebug = it.debug != 0.toByte()
@@ -62,7 +65,7 @@ class SymbolicObject : PointerType() {
         initialized = true
     }
 
-    fun createSymCache(): SymbolCache? {
+    fun buildSymCache(): SymbolicSymCache? {
         val symbolCache = SymbolicLibrary.INSTANCE.symbolic_symcache_from_object(this)
 
         symbolCache?.init()
