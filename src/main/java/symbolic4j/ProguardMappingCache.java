@@ -1,7 +1,8 @@
 package symbolic4j;
 
 import com.google.common.primitives.Ints;
-import kotlin.Pair;
+import symbolic4j.type.Pair;
+import symbolic4j.type.StringTable;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -38,7 +39,7 @@ public record ProguardMappingCache(Header header,
 
             Pair<Header, ByteBuffer> headerPair = loadHeader(buffer);
 
-            Header header = headerPair.getFirst();
+            Header header = headerPair.left();
 
             if (!Arrays.equals(Ints.toByteArray(header.magic), PRGCACHE_MAGIC)) {
                 throw new IllegalStateException("Invalid ProguardMappingCache file, magic number mismatch");
@@ -48,18 +49,18 @@ public record ProguardMappingCache(Header header,
                 throw new IllegalStateException("Invalid ProguardMappingCache file, version mismatch");
             }
 
-            Pair<Classes, ByteBuffer> classesPair = loadClasses(headerPair.getSecond(), header.numOfClasses);
-            Pair<Members, ByteBuffer> membersPair = loadMembers(classesPair.getSecond(), header.numOfMembers);
-            Pair<Members, ByteBuffer> membersByParamsPair = loadMembers(membersPair.getSecond(), header.numOfMembersByParams);
+            Pair<Classes, ByteBuffer> classesPair = loadClasses(headerPair.right(), header.numOfClasses);
+            Pair<Members, ByteBuffer> membersPair = loadMembers(classesPair.right(), header.numOfMembers);
+            Pair<Members, ByteBuffer> membersByParamsPair = loadMembers(membersPair.right(), header.numOfMembersByParams);
 
-            if (membersByParamsPair.getSecond().remaining() < header.stringBytes) {
+            if (membersByParamsPair.right().remaining() < header.stringBytes) {
                 throw new IllegalStateException("Invalid ProguardMappingCache file, string section too short");
             }
 
-            Classes classes = classesPair.getFirst();
-            Members members = membersPair.getFirst();
-            Members membersByParams = membersByParamsPair.getFirst();
-            ByteBuffer stBuffer = alignBuffer(membersByParamsPair.getSecond(), 8);
+            Classes classes = classesPair.left();
+            Members members = membersPair.left();
+            Members membersByParams = membersByParamsPair.left();
+            ByteBuffer stBuffer = alignBuffer(membersByParamsPair.right(), 8);
             StringTable stringTable = new StringTable(stBuffer);
 
             return new ProguardMappingCache(header, classes, members, membersByParams, stringTable);
@@ -68,7 +69,7 @@ public record ProguardMappingCache(Header header,
         }
     }
 
-    public ProguardRemapResult remapFrame(String className, String methodName, int line) {
+    public RemapResult remapFrame(String className, String methodName, int line) {
         Class clazz = getClass(className);
         if (clazz == null) {
             return null;
@@ -82,7 +83,7 @@ public record ProguardMappingCache(Header header,
             return null;
         }
 
-        List<ProguardRemapResult.Frame> frames = new ArrayList<>();
+        List<RemapResult.Frame> frames = new ArrayList<>();
 
         for (Member member : matchingMembers) {
             if (member.endLine > 0 && (line < member.startLine || line > member.endLine)) {
@@ -127,13 +128,13 @@ public record ProguardMappingCache(Header header,
                 continue;
             }
 
-            ProguardRemapResult.Frame frame = new ProguardRemapResult.Frame(sourceClass, sourceMethod, sourceFile, sourceLine,
+            RemapResult.Frame frame = new RemapResult.Frame(sourceClass, sourceMethod, sourceFile, sourceLine,
                     (member.paramsOffset != -1) ? stringTable.get(member.paramsOffset) : "");
 
             frames.add(frame);
         }
 
-        return new ProguardRemapResult(frames);
+        return new RemapResult(frames);
     }
 
 
@@ -178,7 +179,6 @@ public record ProguardMappingCache(Header header,
             return null;
         }
 
-        // 可能会有多个匹配项（内联函数？）
         Member firstMatchedMember = matchingMembers.getFirst();
 
         if (matchingMembers.stream().anyMatch(it ->
@@ -219,17 +219,17 @@ public record ProguardMappingCache(Header header,
     private static Pair<Header, ByteBuffer> loadHeader(ByteBuffer buffer) {
         Pair<ByteBuffer, ByteBuffer> pair = splitBuffer(buffer, HEADER_SIZE);
 
-        pair.getFirst().order(ByteOrder.LITTLE_ENDIAN);
+        pair.left().order(ByteOrder.LITTLE_ENDIAN);
 
-        int magic = pair.getFirst().getInt();
-        int version = pair.getFirst().getInt();
-        int numOfClasses = pair.getFirst().getInt();
-        int numOfMembers = pair.getFirst().getInt();
-        int numOfMembersByParams = pair.getFirst().getInt();
-        int stringBytes = pair.getFirst().getInt();
+        int magic = pair.left().getInt();
+        int version = pair.left().getInt();
+        int numOfClasses = pair.left().getInt();
+        int numOfMembers = pair.left().getInt();
+        int numOfMembersByParams = pair.left().getInt();
+        int stringBytes = pair.left().getInt();
         Header header = new Header(magic, version, numOfClasses, numOfMembers, numOfMembersByParams, stringBytes);
 
-        return new Pair<>(header, pair.getSecond());
+        return new Pair<>(header, pair.right());
     }
 
     private static Pair<Classes, ByteBuffer> loadClasses(ByteBuffer buffer, int numOfClasses) {
@@ -242,9 +242,9 @@ public record ProguardMappingCache(Header header,
         ByteBuffer aligned = alignBuffer(buffer, 8);
         Pair<ByteBuffer, ByteBuffer> pair = splitBuffer(aligned, expectedSize);
 
-        Classes classes = new Classes(pair.getFirst());
+        Classes classes = new Classes(pair.left());
 
-        return new Pair<>(classes, pair.getSecond());
+        return new Pair<>(classes, pair.right());
     }
 
     private static Pair<Members, ByteBuffer> loadMembers(ByteBuffer buffer, int nums) {
@@ -257,9 +257,9 @@ public record ProguardMappingCache(Header header,
         ByteBuffer aligned = alignBuffer(buffer, 8);
         Pair<ByteBuffer, ByteBuffer> pair = splitBuffer(aligned, expectedSize);
 
-        Members members = new Members(pair.getFirst());
+        Members members = new Members(pair.left());
 
-        return new Pair<>(members, pair.getSecond());
+        return new Pair<>(members, pair.right());
     }
 
 

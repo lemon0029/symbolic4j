@@ -1,4 +1,4 @@
-package symbolic4j;
+package symbolic4j.type;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

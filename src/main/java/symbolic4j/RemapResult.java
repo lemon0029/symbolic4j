@@ -2,7 +2,7 @@ package symbolic4j;
 
 import java.util.List;
 
-public record ProguardRemapResult(List<Frame> frames) {
+public record RemapResult(List<Frame> frames) {
 
     public boolean hasFrames() {
         return this.frames != null && !this.frames.isEmpty();

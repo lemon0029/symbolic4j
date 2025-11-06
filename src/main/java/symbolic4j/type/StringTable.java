@@ -1,4 +1,6 @@
-package symbolic4j;
+package symbolic4j.type;
+
+import symbolic4j.BufferUtils;
 
 import java.nio.ByteBuffer;
 

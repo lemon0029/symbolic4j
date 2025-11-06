@@ -2,7 +2,9 @@ package symbolic4j;
 
 
 import com.google.common.primitives.Ints;
-import kotlin.Pair;
+import symbolic4j.type.Pair;
+import symbolic4j.type.Pods;
+import symbolic4j.type.StringTable;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -36,7 +38,7 @@ public record SymCache(Header header,
             MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
 
             Pair<Header, ByteBuffer> headerPair = readHeader(buffer);
-            Header header = headerPair.getFirst();
+            Header header = headerPair.left();
 
             if (header.magic != Ints.fromByteArray(SYMCACHE_MAGIC)) {
                 throw new IllegalStateException("Invalid SymCache file, magic number mismatch");
@@ -46,17 +48,17 @@ public record SymCache(Header header,
                 throw new IllegalStateException("Invalid SymCache file, version mismatch");
             }
 
-            Pair<Files, ByteBuffer> filesPair = readFiles(headerPair.getSecond(), header.numOfFiles);
-            Pair<Functions, ByteBuffer> functionsPair = readFunctions(filesPair.getSecond(), header.numOfFunctions);
-            Pair<SourceLocations, ByteBuffer> sourceLocationsPair = readSourceLocations(functionsPair.getSecond(), header.numOfSourceLocations);
-            Pair<Ranges, ByteBuffer> rangesPair = readRanges(sourceLocationsPair.getSecond(), header.numOfRanges);
+            Pair<Files, ByteBuffer> filesPair = readFiles(headerPair.right(), header.numOfFiles);
+            Pair<Functions, ByteBuffer> functionsPair = readFunctions(filesPair.right(), header.numOfFunctions);
+            Pair<SourceLocations, ByteBuffer> sourceLocationsPair = readSourceLocations(functionsPair.right(), header.numOfSourceLocations);
+            Pair<Ranges, ByteBuffer> rangesPair = readRanges(sourceLocationsPair.right(), header.numOfRanges);
 
-            Files files = filesPair.getFirst();
-            Functions functions = functionsPair.getFirst();
-            SourceLocations sourceLocations = sourceLocationsPair.getFirst();
-            Ranges ranges = rangesPair.getFirst();
+            Files files = filesPair.left();
+            Functions functions = functionsPair.left();
+            SourceLocations sourceLocations = sourceLocationsPair.left();
+            Ranges ranges = rangesPair.left();
 
-            ByteBuffer stBuffer = BufferUtils.alignBuffer(rangesPair.getSecond(), 8);
+            ByteBuffer stBuffer = BufferUtils.alignBuffer(rangesPair.right(), 8);
             StringTable stringTable = new StringTable(stBuffer);
 
             return new SymCache(header, files, functions, sourceLocations, ranges, stringTable);
@@ -211,9 +213,9 @@ public record SymCache(Header header,
         ByteBuffer aligned = BufferUtils.alignBuffer(second, 8);
         Pair<ByteBuffer, ByteBuffer> pair = BufferUtils.splitBuffer(aligned, expectedSize);
 
-        Ranges ranges = new Ranges(pair.getFirst());
+        Ranges ranges = new Ranges(pair.left());
 
-        return new Pair<>(ranges, pair.getSecond());
+        return new Pair<>(ranges, pair.right());
     }
 
     private static Pair<SourceLocations, ByteBuffer> readSourceLocations(ByteBuffer second, int numOfSourceLocations) {
@@ -226,9 +228,9 @@ public record SymCache(Header header,
         ByteBuffer aligned = BufferUtils.alignBuffer(second, 8);
         Pair<ByteBuffer, ByteBuffer> pair = BufferUtils.splitBuffer(aligned, expectedSize);
 
-        SourceLocations sourceLocations = new SourceLocations(pair.getFirst());
+        SourceLocations sourceLocations = new SourceLocations(pair.left());
 
-        return new Pair<>(sourceLocations, pair.getSecond());
+        return new Pair<>(sourceLocations, pair.right());
     }
 
     private static Pair<Functions, ByteBuffer> readFunctions(ByteBuffer second, int numOfFunctions) {
@@ -241,9 +243,9 @@ public record SymCache(Header header,
         ByteBuffer aligned = BufferUtils.alignBuffer(second, 8);
         Pair<ByteBuffer, ByteBuffer> pair = BufferUtils.splitBuffer(aligned, expectedSize);
 
-        Functions functions = new Functions(pair.getFirst());
+        Functions functions = new Functions(pair.left());
 
-        return new Pair<>(functions, pair.getSecond());
+        return new Pair<>(functions, pair.right());
     }
 
     private static Pair<Files, ByteBuffer> readFiles(ByteBuffer buffer, int numOfFiles) {
@@ -256,15 +258,15 @@ public record SymCache(Header header,
         ByteBuffer aligned = BufferUtils.alignBuffer(buffer, 8);
         Pair<ByteBuffer, ByteBuffer> pair = BufferUtils.splitBuffer(aligned, expectedSize);
 
-        Files files = new Files(pair.getFirst());
+        Files files = new Files(pair.left());
 
-        return new Pair<>(files, pair.getSecond());
+        return new Pair<>(files, pair.right());
     }
 
     private static Pair<Header, ByteBuffer> readHeader(MappedByteBuffer buffer) {
         Pair<ByteBuffer, ByteBuffer> pair = BufferUtils.splitBuffer(buffer, HEADER_SIZE);
 
-        ByteBuffer current = pair.getFirst();
+        ByteBuffer current = pair.left();
         current.order(ByteOrder.BIG_ENDIAN);
 
         int magic = current.getInt();
@@ -301,7 +303,7 @@ public record SymCache(Header header,
                 reserved
         );
 
-        return new Pair<>(header, pair.getSecond());
+        return new Pair<>(header, pair.right());
     }
 
     public record Header(

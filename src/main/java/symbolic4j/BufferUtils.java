@@ -1,6 +1,6 @@
 package symbolic4j;
 
-import kotlin.Pair;
+import symbolic4j.type.Pair;
 
 import java.nio.ByteBuffer;
 
